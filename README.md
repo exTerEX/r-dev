@@ -5,17 +5,28 @@ A R development container for [Visual Studio Code](https://code.visualstudio.com
 
 ## Example
 
-To use as development container for your project create, `.devcontainer/devcontainer.json` to project with the content,
+To use as development container for your project create `.devcontainer/devcontainer.json` to project with the content,
 
 ```json
 {
     "name": "",
+	"updateRemoteUserUID": false,
     "image": "exterex/r-dev",
     "extensions": [
         "Ikuyadeu.r"
     ]
 }
 ```
+
+To customize user in container use,
+```json
+{
+    "containerUser": "vscode",
+    "updateRemoteUserUID": false
+}
+```
+
+in additon to the codeblock above. `"updateRemoteUserUID": false` prevents container to rebuild to update GID/UID if `containerUser` or `remoteUser` is specified.
 
 For configuration of `devcontainer.json` see [code.visualstudio.com](https://code.visualstudio.com/docs/remote/devcontainerjson-reference)
 
