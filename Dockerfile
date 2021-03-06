@@ -1,27 +1,25 @@
-FROM ubuntu:20.04
+# Copyright 2021 Andreas Sagen
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-ENV DEBIAN_FRONTEND=noninteractive
+FROM exterex/base-dev
 
-ARG USERNAME=vscode
-ARG UID=1000
-ARG GID=${UID}
+ENV DEBIAN_FRONTEND noninteractive
 
-ENV HOME=/home/${USERNAME}
-
-RUN apt update \
-    && apt -y install --no-install-recommends \
-    ca-certificates \
-    software-properties-common \
-    curl \
-    locales \
-    sudo \
-    git
-
-RUN add-apt-repository --enable-source --yes "ppa:marutter/rrutter4.0" \
-    && add-apt-repository --enable-source --yes "ppa:c2d4u.team/c2d4u4.0+"
-
-RUN apt update \
-    && apt -y install --no-install-recommends \
+RUN sudo add-apt-repository --enable-source --yes "ppa:marutter/rrutter4.0" \
+    && sudo add-apt-repository --enable-source --yes "ppa:c2d4u.team/c2d4u4.0+" \
+    && sudo apt update \
+    && sudo apt --assume-yes install --no-install-recommends \
     r-base \
     r-recommended \
     r-cran-formatr\
@@ -32,26 +30,18 @@ RUN apt update \
     r-cran-highr \
     r-cran-rcurl
 
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-    && locale-gen en_US.utf8 \
-    && /usr/sbin/update-locale LANG=en_US.UTF-8
+RUN sudo apt --assume-yes install --no-install-recommends \
+    littler
 
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
+RUN sudo ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
+    && sudo ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
+    && sudo ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
+    && sudo ln -s /usr/lib/R/site-library/littler/examples/testInstalled.r /usr/local/bin/testInstalled.r
 
-RUN groupadd --gid ${GID} ${USERNAME} \
-    && useradd -s /bin/bash --uid ${UID} --gid ${GID} -m ${USERNAME} \
-    && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
-    && chmod 0440 /etc/sudoers.d/${USERNAME} \
-    && chown ${USERNAME}:${USERNAME} ${HOME}
+RUN sudo install.r docopt \
+    && sudo rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
+    && sudo rm -rf /var/lib/apt/lists/*
 
-ENV TZ UTC
+ENV DEBIAN_FRONTEND dialog
 
-RUN sudo rm -rf /var/lib/apt/lists/* \
-    && curl -fsSL https://raw.github.com/ohmybash/oh-my-bash/master/tools/install.sh | bash || true
-
-COPY --chown=${USERNAME}:${USERNAME} ./config/.bashrc ${HOME}/.bashrc
-
-ENV DEBIAN_FRONTEND=dialog
-
-CMD ["bash"]
+CMD [ "bash" ]
