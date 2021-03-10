@@ -16,10 +16,15 @@ FROM exterex/base-dev
 
 ENV DEBIAN_FRONTEND noninteractive
 
-RUN sudo add-apt-repository --enable-source --yes "ppa:marutter/rrutter4.0" \
-    && sudo add-apt-repository --enable-source --yes "ppa:c2d4u.team/c2d4u4.0+" \
-    && sudo apt update \
+# TODO: Workaround to remove software-properties-common entirely
+RUN sudo apt update \
     && sudo apt --assume-yes install --no-install-recommends \
+    software-properties-common \
+    && sudo add-apt-repository --enable-source --yes "ppa:marutter/rrutter4.0" \
+    && sudo add-apt-repository --enable-source --yes "ppa:c2d4u.team/c2d4u4.0+" \
+    && sudo apt --assume-yes autoremove software-properties-common
+
+RUN sudo apt --assume-yes install --no-install-recommends \
     r-base \
     r-recommended \
     r-cran-formatr\
